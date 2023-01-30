@@ -332,8 +332,8 @@ final class LoafViewController: UIViewController {
                 NSLayoutConstraint.activate([
                     imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
                     imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-                    imageView.heightAnchor.constraint(equalToConstant: 28),
-                    imageView.widthAnchor.constraint(equalToConstant: 28),
+                    imageView.heightAnchor.constraint(equalToConstant: 24),
+                    imageView.widthAnchor.constraint(equalToConstant: 24),
                     
                     label.leadingAnchor.constraint(equalTo: imageView.trailingAnchor, constant: 10),
                     label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -4),
@@ -344,8 +344,8 @@ final class LoafViewController: UIViewController {
                 NSLayoutConstraint.activate([
                     imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
                     imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-                    imageView.heightAnchor.constraint(equalToConstant: 28),
-                    imageView.widthAnchor.constraint(equalToConstant: 28),
+                    imageView.heightAnchor.constraint(equalToConstant: 24),
+                    imageView.widthAnchor.constraint(equalToConstant: 24),
                     
                     label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
                     label.trailingAnchor.constraint(equalTo: imageView.leadingAnchor, constant: -4),
