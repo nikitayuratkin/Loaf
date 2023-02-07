@@ -88,6 +88,7 @@ final public class Loaf {
         case error
         case warning
         case info
+        case withCancelButton(Style)
         case custom(Style)
     }
     
@@ -140,12 +141,15 @@ final public class Loaf {
         public static let error = Icons.imageOfError().withRenderingMode(.alwaysTemplate)
         public static let warning = Icons.imageOfWarning().withRenderingMode(.alwaysTemplate)
         public static let info = Icons.imageOfInfo().withRenderingMode(.alwaysTemplate)
+        public static let closeIcon = Icons.imageOfClose().withRenderingMode(.alwaysTemplate)
     }
     
     // Reason a Loaf was dismissed
     public enum DismissalReason {
         case tapped
         case timedOut
+        case cancelButtonTapped
+        case callBackReason
     }
     
     // MARK: - Properties
@@ -294,6 +298,13 @@ final class LoafViewController: UIViewController {
             imageView.image = Loaf.Icon.info
             view.backgroundColor = UIColor(hexString: "##34495e")
             constrainWithIconAlignment(.left)
+        case .withCancelButton(style: let style):
+            imageView.image = style.icon
+            view.backgroundColor = style.backgroundColor
+            imageView.tintColor = style.tintColor
+            label.textColor = style.textColor
+            label.font = style.font
+            constrainWithIconAlignment(style.iconAlignment, showsIcon: imageView.image != nil)
         case .custom(style: let style):
             imageView.image = style.icon
             view.backgroundColor = style.backgroundColor
@@ -301,6 +312,7 @@ final class LoafViewController: UIViewController {
             label.textColor = style.textColor
             label.font = style.font
             constrainWithIconAlignment(style.iconAlignment, showsIcon: imageView.image != nil)
+        
         }
         
         let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
