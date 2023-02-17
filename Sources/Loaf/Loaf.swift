@@ -12,6 +12,14 @@ final public class Loaf {
     
     // MARK: - Specifiers
     
+    // Reason a Loaf was dismissed
+    public enum DismissalReason {
+        /// Включает 3 обработки дисмисса (по тапу, по свайпу, по таймауту)
+        case all
+        /// Дисмисс по нажатию на кнопку `cancelXButton` и свайпу. По тапу колбэк.
+        case interactive
+    }
+    
     /// Define a custom style for the loaf.
     public struct Style {
         /// Specifies the position of the icon on the loaf. (Default is `.left`)
@@ -22,7 +30,7 @@ final public class Loaf {
             case left
             case right
         }
-		
+        
         /// Specifies the width of the Loaf. (Default is `.fixed(280)`)
         ///
         /// - fixed: Specified as pixel size. i.e. 280
@@ -52,10 +60,10 @@ final public class Loaf {
         
         /// The position of the icon
         let iconAlignment: IconAlignment
-		
+        
         /// The width of the loaf
         let width: Width
-		
+        
         public init(
             backgroundColor: UIColor,
             textColor: UIColor = .white,
@@ -65,15 +73,15 @@ final public class Loaf {
             textAlignment: NSTextAlignment = .left,
             iconAlignment: IconAlignment = .left,
             width: Width = .fixed(280)) {
-            self.backgroundColor = backgroundColor
-            self.textColor = textColor
-            self.tintColor = tintColor
-            self.font = font
-            self.icon = icon
-            self.textAlignment = textAlignment
-            self.iconAlignment = iconAlignment
-            self.width = width
-        }
+                self.backgroundColor = backgroundColor
+                self.textColor = textColor
+                self.tintColor = tintColor
+                self.font = font
+                self.icon = icon
+                self.textAlignment = textAlignment
+                self.iconAlignment = iconAlignment
+                self.width = width
+            }
     }
     
     /// Defines the loaf's status. (Default is `.info`)
@@ -88,7 +96,7 @@ final public class Loaf {
         case error
         case warning
         case info
-        case withCancelButton(Style)
+        case withCancelButton
         case custom(Style)
     }
     
@@ -126,9 +134,9 @@ final public class Loaf {
         
         var length: TimeInterval {
             switch self {
-            case .short:   return 2.0
-            case .average: return 4.0
-            case .long:    return 8.0
+            case .short:   return 1.5
+            case .average: return 3.0
+            case .long:    return 7.0
             case .custom(let timeInterval):
                 return timeInterval
             }
@@ -144,14 +152,6 @@ final public class Loaf {
         public static let closeIcon = Icons.imageOfClose().withRenderingMode(.alwaysTemplate)
     }
     
-    // Reason a Loaf was dismissed
-    public enum DismissalReason {
-        case tapped
-        case timedOut
-        case cancelButtonTapped
-        case callBackReason
-    }
-    
     // MARK: - Properties
     public typealias LoafCompletionHandler = ((DismissalReason) -> Void)?
     var message: String
@@ -160,18 +160,21 @@ final public class Loaf {
     var duration: Duration = .average
     var presentingDirection: Direction
     var dismissingDirection: Direction
+    var dismissalReason: DismissalReason
     var completionHandler: LoafCompletionHandler = nil
     weak var sender: UIViewController?
     
     // MARK: - Public methods
     public init(_ message: String,
                 state: State = .info,
+                dismissalReason: DismissalReason = .all,
                 location: Location = .bottom,
                 presentingDirection: Direction = .vertical,
                 dismissingDirection: Direction = .vertical,
                 sender: UIViewController) {
         self.message = message
         self.state = state
+        self.dismissalReason = dismissalReason
         self.location = location
         self.presentingDirection = presentingDirection
         self.dismissingDirection = dismissingDirection
@@ -186,17 +189,17 @@ final public class Loaf {
         self.completionHandler = completionHandler
         LoafManager.shared.queueAndPresent(self)
     }
-	
-	/// Manually dismiss a currently presented Loaf
-	///
-	/// - Parameter animated: Whether the dismissal will be animated
-	public static func dismiss(sender: UIViewController, animated: Bool = true){
-		guard LoafManager.shared.isPresenting else { return }
-		guard let vc = sender.presentedViewController as? LoafViewController else { return }
-		vc.dismiss(animated: animated) {
-			vc.delegate?.loafDidDismiss()
-		}
-	}
+    
+    /// Manually dismiss a currently presented Loaf
+    ///
+    /// - Parameter animated: Whether the dismissal will be animated
+    public static func dismiss(sender: UIViewController, animated: Bool = true){
+        guard LoafManager.shared.isPresenting else { return }
+        guard let vc = sender.presentedViewController as? LoafViewController else { return }
+        vc.dismiss(animated: animated) {
+            vc.delegate?.loafDidDismiss()
+        }
+    }
 }
 
 final fileprivate class LoafManager: LoafDelegate {
@@ -230,24 +233,27 @@ protocol LoafDelegate: AnyObject {
 
 final class LoafViewController: UIViewController {
     var loaf: Loaf
+    var isCancelButtonNeeded: Bool = false
     
     let label = UILabel()
+    let cancelXButton = UIButton()
     let imageView = UIImageView(image: nil)
     var font = UIFont.systemFont(ofSize: 14, weight: .medium)
     var textAlignment: NSTextAlignment = .left
     var transDelegate: UIViewControllerTransitioningDelegate
+    var dismissalReason: Loaf.DismissalReason?
     weak var delegate: LoafDelegate?
     
     init(_ toast: Loaf) {
         self.loaf = toast
         self.transDelegate = Manager(loaf: toast, size: .zero)
         super.init(nibName: nil, bundle: nil)
-		
+        
         var width: CGFloat?
         if case let Loaf.State.custom(style) = loaf.state {
             self.font = style.font
             self.textAlignment = style.textAlignment
-			
+            
             switch style.width {
             case .fixed(let value):
                 width = value
@@ -277,6 +283,14 @@ final class LoafViewController: UIViewController {
         label.setContentCompressionResistancePriority(.required, for: .vertical)
         label.translatesAutoresizingMaskIntoConstraints = false
         
+        cancelXButton.setImage(Loaf.Icon.closeIcon, for: .normal)
+        cancelXButton.alpha = 0
+        cancelXButton.isUserInteractionEnabled = false
+        cancelXButton.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
+        cancelXButton.contentVerticalAlignment = .fill
+        cancelXButton.contentHorizontalAlignment = .fill
+        cancelXButton.translatesAutoresizingMaskIntoConstraints = false
+        
         imageView.tintColor = .white
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
@@ -284,27 +298,24 @@ final class LoafViewController: UIViewController {
         switch loaf.state {
         case .success:
             imageView.image = Loaf.Icon.success
-            view.backgroundColor = UIColor(hexString: "#2ecc71")
+            view.backgroundColor = UIColor(hexString: "#8e8e8e")
             constrainWithIconAlignment(.left)
         case .warning:
             imageView.image = Loaf.Icon.warning
-            view.backgroundColor = UIColor(hexString: "##f1c40f")
+            view.backgroundColor = UIColor(hexString: "#8e8e8e")
             constrainWithIconAlignment(.left)
         case .error:
             imageView.image = Loaf.Icon.error
-            view.backgroundColor = UIColor(hexString: "##e74c3c")
+            view.backgroundColor = UIColor(hexString: "#8e8e8e")
             constrainWithIconAlignment(.left)
         case .info:
             imageView.image = Loaf.Icon.info
-            view.backgroundColor = UIColor(hexString: "##34495e")
+            view.backgroundColor = UIColor(hexString: "#8e8e8e")
             constrainWithIconAlignment(.left)
-        case .withCancelButton(style: let style):
-            imageView.image = style.icon
-            view.backgroundColor = style.backgroundColor
-            imageView.tintColor = style.tintColor
-            label.textColor = style.textColor
-            label.font = style.font
-            constrainWithIconAlignment(style.iconAlignment, showsIcon: imageView.image != nil)
+        case .withCancelButton:
+            imageView.image = Loaf.Icon.closeIcon
+            view.backgroundColor = UIColor(hexString: "#8e8e8e")
+            constrainWithIconAlignment(.right)
         case .custom(style: let style):
             imageView.image = style.icon
             view.backgroundColor = style.backgroundColor
@@ -312,66 +323,179 @@ final class LoafViewController: UIViewController {
             label.textColor = style.textColor
             label.font = style.font
             constrainWithIconAlignment(style.iconAlignment, showsIcon: imageView.image != nil)
-        
+            
         }
         
-        let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTap))
-        view.addGestureRecognizer(tapGesture)
+        switch loaf.dismissalReason {
+        case .all:
+            isCancelButtonNeeded = false
+            let swipeGesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeGesture))
+            swipeGesture.direction = .up
+            view.addGestureRecognizer(swipeGesture)
+            
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture))
+            view.addGestureRecognizer(tapGesture)
+
+            DispatchQueue.main.asyncAfter(deadline: .now() + loaf.duration.length, execute: {
+                self.dismiss(animated: true) { [weak self] in
+                    self?.delegate?.loafDidDismiss()
+                    self?.loaf.completionHandler?(.all)
+                }
+            })
+        case .interactive:
+            isCancelButtonNeeded = true
+            let buttonTapGesture = UITapGestureRecognizer(target: self, action: #selector(handleCancelButtonTap))
+            cancelXButton.addGestureRecognizer(buttonTapGesture)
+            let tapViewGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapInteractiveGesture))
+            view.addGestureRecognizer(tapViewGesture)
+            let swipeGesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeInteractiveGesture))
+            swipeGesture.direction = .up
+            view.addGestureRecognizer(swipeGesture)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + loaf.duration.length, execute: {
+                self.dismiss(animated: true) { [weak self] in
+                    self?.delegate?.loafDidDismiss()
+//                    self?.loaf.completionHandler?(.all)
+                }
+            })
+        }
         
-        DispatchQueue.main.asyncAfter(deadline: .now() + loaf.duration.length, execute: {
-            self.dismiss(animated: true) { [weak self] in
-                self?.delegate?.loafDidDismiss()
-                self?.loaf.completionHandler?(.timedOut)
-            }
-        })
     }
     
-    @objc private func handleTap() {
+    /// For DismissalReason: .all
+    @objc private func handleTapGesture() {
         dismiss(animated: true) { [weak self] in
             self?.delegate?.loafDidDismiss()
-            self?.loaf.completionHandler?(.tapped)
+            self?.loaf.completionHandler?(.all)
+        }
+    }
+    
+    @objc private func handleSwipeGesture() {
+        dismiss(animated: true) { [weak self] in
+            self?.delegate?.loafDidDismiss()
+            self?.loaf.completionHandler?(.all)
+        }
+    }
+    
+    /// For DismissalReason: .interactive
+    @objc private func handleCancelButtonTap() {
+        dismiss(animated: true) { [weak self] in
+            self?.delegate?.loafDidDismiss()
+        }
+    }
+    
+    @objc private func handleTapInteractiveGesture() {
+        dismiss(animated: true) { [weak self] in
+            self?.delegate?.loafDidDismiss()
+            self?.loaf.completionHandler?(.interactive)
+        }
+    }
+    
+    @objc private func handleSwipeInteractiveGesture() {
+        dismiss(animated: true) { [weak self] in
+            self?.delegate?.loafDidDismiss()
         }
     }
     
     private func constrainWithIconAlignment(_ alignment: Loaf.Style.IconAlignment, showsIcon: Bool = true) {
         view.addSubview(label)
+        view.addSubview(cancelXButton)
+        
+        NSLayoutConstraint.activate([
+            cancelXButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 4),
+            cancelXButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+            cancelXButton.heightAnchor.constraint(equalToConstant: 40),
+            cancelXButton.widthAnchor.constraint(equalToConstant: 40),
+        ])
         
         if showsIcon {
             view.addSubview(imageView)
             
             switch alignment {
             case .left:
+                if isCancelButtonNeeded {
+                    cancelXButton.alpha = 1
+                    cancelXButton.isUserInteractionEnabled = true
+                    NSLayoutConstraint.activate([
+                        imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+                        imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                        imageView.heightAnchor.constraint(equalToConstant: 24),
+                        imageView.widthAnchor.constraint(equalToConstant: 24),
+                        
+                        label.leadingAnchor.constraint(equalTo: imageView.trailingAnchor, constant: 10),
+                        label.trailingAnchor.constraint(equalTo: cancelXButton.trailingAnchor, constant: -4),
+                        label.topAnchor.constraint(equalTo: view.topAnchor),
+                        label.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+                    ])
+                } else {
+                    cancelXButton.alpha = 0
+                    cancelXButton.isUserInteractionEnabled = false
+                    NSLayoutConstraint.activate([
+                        imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+                        imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                        imageView.heightAnchor.constraint(equalToConstant: 24),
+                        imageView.widthAnchor.constraint(equalToConstant: 24),
+                        
+                        label.leadingAnchor.constraint(equalTo: imageView.trailingAnchor, constant: 10),
+                        label.trailingAnchor.constraint(equalTo: cancelXButton.trailingAnchor, constant: -4),
+                        label.topAnchor.constraint(equalTo: view.topAnchor),
+                        label.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+                    ])
+                }
+                
+            case .right:
+                if isCancelButtonNeeded {
+                    cancelXButton.alpha = 1
+                    cancelXButton.isUserInteractionEnabled = true
+                    NSLayoutConstraint.activate([
+                        imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+                        imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                        imageView.heightAnchor.constraint(equalToConstant: 24),
+                        imageView.widthAnchor.constraint(equalToConstant: 24),
+                        
+                        label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+                        label.trailingAnchor.constraint(equalTo: imageView.leadingAnchor, constant: -4),
+                        label.topAnchor.constraint(equalTo: view.topAnchor),
+                        label.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+                    ])
+                } else {
+                    cancelXButton.alpha = 0
+                    cancelXButton.isUserInteractionEnabled = false
+                    NSLayoutConstraint.activate([
+                        imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
+                        imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                        imageView.heightAnchor.constraint(equalToConstant: 24),
+                        imageView.widthAnchor.constraint(equalToConstant: 24),
+                        
+                        label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
+                        label.trailingAnchor.constraint(equalTo: imageView.leadingAnchor, constant: -4),
+                        label.topAnchor.constraint(equalTo: view.topAnchor),
+                        label.bottomAnchor.constraint(equalTo: view.bottomAnchor)
+                    ])
+                }
+                
+            }
+        } else {
+            if isCancelButtonNeeded {
+                cancelXButton.alpha = 1
+                cancelXButton.isUserInteractionEnabled = true
                 NSLayoutConstraint.activate([
-                    imageView.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-                    imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-                    imageView.heightAnchor.constraint(equalToConstant: 24),
-                    imageView.widthAnchor.constraint(equalToConstant: 24),
-                    
-                    label.leadingAnchor.constraint(equalTo: imageView.trailingAnchor, constant: 10),
-                    label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -4),
+                    label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
+                    label.trailingAnchor.constraint(equalTo: cancelXButton.trailingAnchor, constant: -4),
                     label.topAnchor.constraint(equalTo: view.topAnchor),
                     label.bottomAnchor.constraint(equalTo: view.bottomAnchor)
                 ])
-            case .right:
+            } else {
+                cancelXButton.alpha = 0
+                cancelXButton.isUserInteractionEnabled = false
                 NSLayoutConstraint.activate([
-                    imageView.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
-                    imageView.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-                    imageView.heightAnchor.constraint(equalToConstant: 24),
-                    imageView.widthAnchor.constraint(equalToConstant: 24),
-                    
                     label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-                    label.trailingAnchor.constraint(equalTo: imageView.leadingAnchor, constant: -4),
+                    label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
                     label.topAnchor.constraint(equalTo: view.topAnchor),
                     label.bottomAnchor.constraint(equalTo: view.bottomAnchor)
                 ])
             }
-        } else {
-            NSLayoutConstraint.activate([
-                label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 10),
-                label.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -10),
-                label.topAnchor.constraint(equalTo: view.topAnchor),
-                label.bottomAnchor.constraint(equalTo: view.bottomAnchor)
-            ])
+            
         }
     }
 }

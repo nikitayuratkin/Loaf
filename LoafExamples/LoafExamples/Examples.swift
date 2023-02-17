@@ -92,6 +92,10 @@ class Examples: UITableViewController {
                 switch dismissalType {
                 case .tapped: print("Tapped!")
                 case .timedOut: print("Timmed out!")
+                case .cancelButtonTapped:
+                    <#code#>
+                case .callBackReason:
+                    <#code#>
                 }
             }
         case .top:
