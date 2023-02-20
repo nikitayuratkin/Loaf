@@ -91,9 +91,10 @@ class Icons: NSObject {
         let context = UIGraphicsGetCurrentContext()!
 
         context.saveGState()
-        let resizedFrame: CGRect = resizing.apply(rect: CGRect(x: 0, y: 0, width: 100, height: 100), target: targetFrame)
+        let resizedFrame: CGRect = resizing.apply(rect: CGRect(x: 0, y: 0, width: 300, height: 300), target: targetFrame)
         context.translateBy(x: resizedFrame.minX, y: resizedFrame.minY)
         context.scaleBy(x: resizedFrame.width / 100, y: resizedFrame.height / 100)
+        UIColor.white.setFill()
 
         let bezierPath = UIBezierPath()
         bezierPath.move(to: CGPoint(x: 92.02, y: 22.92))
