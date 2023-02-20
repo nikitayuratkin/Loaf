@@ -86,14 +86,14 @@ class Icons: NSObject {
         context.restoreGState()
     }
     
-    class func drawClose(frame targetFrame: CGRect = CGRect(x: 0, y: 0, width: 300, height: 300), resizing: ResizingBehavior = .aspectFit, color: UIColor = UIColor(red: 0.000, green: 0.000, blue: 0.000, alpha: 1.000)) {
+    class func drawClose(frame targetFrame: CGRect = CGRect(x: 0, y: 0, width: 200, height: 200), resizing: ResizingBehavior = .aspectFit, color: UIColor = UIColor(red: 0.000, green: 0.000, blue: 0.000, alpha: 1.000)) {
 
         let context = UIGraphicsGetCurrentContext()!
 
         context.saveGState()
-        let resizedFrame: CGRect = resizing.apply(rect: CGRect(x: 0, y: 0, width: 300, height: 300), target: targetFrame)
+        let resizedFrame: CGRect = resizing.apply(rect: CGRect(x: 0, y: 0, width: 200, height: 200), target: targetFrame)
         context.translateBy(x: resizedFrame.minX, y: resizedFrame.minY)
-        context.scaleBy(x: resizedFrame.width / 100, y: resizedFrame.height / 100)
+        context.scaleBy(x: resizedFrame.width / 200, y: resizedFrame.height / 200)
         UIColor.white.setFill()
 
         let bezierPath = UIBezierPath()
