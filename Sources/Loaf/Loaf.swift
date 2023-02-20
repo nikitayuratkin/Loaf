@@ -155,26 +155,26 @@ final public class Loaf {
     // MARK: - Properties
     public typealias LoafCompletionHandler = ((DismissalReason) -> Void)?
     var message: String
+    var dismissalReason: DismissalReason
     var state: State
     var location: Location
     var duration: Duration = .average
     var presentingDirection: Direction
     var dismissingDirection: Direction
-    var dismissalReason: DismissalReason
     var completionHandler: LoafCompletionHandler = nil
     weak var sender: UIViewController?
     
     // MARK: - Public methods
     public init(_ message: String,
-                state: State = .info,
                 dismissalReason: DismissalReason = .all,
+                state: State = .info,
                 location: Location = .bottom,
                 presentingDirection: Direction = .vertical,
                 dismissingDirection: Direction = .vertical,
                 sender: UIViewController) {
         self.message = message
-        self.state = state
         self.dismissalReason = dismissalReason
+        self.state = state
         self.location = location
         self.presentingDirection = presentingDirection
         self.dismissingDirection = dismissingDirection
@@ -241,7 +241,6 @@ final class LoafViewController: UIViewController {
     var font = UIFont.systemFont(ofSize: 14, weight: .medium)
     var textAlignment: NSTextAlignment = .left
     var transDelegate: UIViewControllerTransitioningDelegate
-    var dismissalReason: Loaf.DismissalReason?
     weak var delegate: LoafDelegate?
     
     init(_ toast: Loaf) {
@@ -286,7 +285,6 @@ final class LoafViewController: UIViewController {
         cancelXButton.setImage(Loaf.Icon.closeIcon, for: .normal)
         cancelXButton.alpha = 0
         cancelXButton.isUserInteractionEnabled = false
-        cancelXButton.imageEdgeInsets = UIEdgeInsets(top: 10, left: 10, bottom: 10, right: 10)
         cancelXButton.contentVerticalAlignment = .fill
         cancelXButton.contentHorizontalAlignment = .fill
         cancelXButton.translatesAutoresizingMaskIntoConstraints = false
@@ -294,6 +292,40 @@ final class LoafViewController: UIViewController {
         imageView.tintColor = .white
         imageView.contentMode = .scaleAspectFit
         imageView.translatesAutoresizingMaskIntoConstraints = false
+        
+        switch loaf.dismissalReason {
+        case .all:
+            isCancelButtonNeeded = false
+            let swipeGesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeGesture))
+            swipeGesture.direction = .up
+            view.addGestureRecognizer(swipeGesture)
+            
+            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture))
+            view.addGestureRecognizer(tapGesture)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + loaf.duration.length, execute: {
+                self.dismiss(animated: true) { [weak self] in
+                    self?.delegate?.loafDidDismiss()
+                    self?.loaf.completionHandler?(.all)
+                }
+            })
+        case .interactive:
+            isCancelButtonNeeded = true
+            let buttonTapGesture = UITapGestureRecognizer(target: self, action: #selector(handleCancelButtonTap))
+            cancelXButton.addGestureRecognizer(buttonTapGesture)
+            let tapViewGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapInteractiveGesture))
+            view.addGestureRecognizer(tapViewGesture)
+            let swipeGesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeInteractiveGesture))
+            swipeGesture.direction = .up
+            view.addGestureRecognizer(swipeGesture)
+            
+            DispatchQueue.main.asyncAfter(deadline: .now() + loaf.duration.length, execute: {
+                self.dismiss(animated: true) { [weak self] in
+                    self?.delegate?.loafDidDismiss()
+                    //                    self?.loaf.completionHandler?(.all)
+                }
+            })
+        }
         
         switch loaf.state {
         case .success:
@@ -324,40 +356,6 @@ final class LoafViewController: UIViewController {
             label.font = style.font
             constrainWithIconAlignment(style.iconAlignment, showsIcon: imageView.image != nil)
             
-        }
-        
-        switch loaf.dismissalReason {
-        case .all:
-            isCancelButtonNeeded = false
-            let swipeGesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeGesture))
-            swipeGesture.direction = .up
-            view.addGestureRecognizer(swipeGesture)
-            
-            let tapGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapGesture))
-            view.addGestureRecognizer(tapGesture)
-
-            DispatchQueue.main.asyncAfter(deadline: .now() + loaf.duration.length, execute: {
-                self.dismiss(animated: true) { [weak self] in
-                    self?.delegate?.loafDidDismiss()
-                    self?.loaf.completionHandler?(.all)
-                }
-            })
-        case .interactive:
-            isCancelButtonNeeded = true
-            let buttonTapGesture = UITapGestureRecognizer(target: self, action: #selector(handleCancelButtonTap))
-            cancelXButton.addGestureRecognizer(buttonTapGesture)
-            let tapViewGesture = UITapGestureRecognizer(target: self, action: #selector(handleTapInteractiveGesture))
-            view.addGestureRecognizer(tapViewGesture)
-            let swipeGesture = UISwipeGestureRecognizer(target: self, action: #selector(handleSwipeInteractiveGesture))
-            swipeGesture.direction = .up
-            view.addGestureRecognizer(swipeGesture)
-            
-            DispatchQueue.main.asyncAfter(deadline: .now() + loaf.duration.length, execute: {
-                self.dismiss(animated: true) { [weak self] in
-                    self?.delegate?.loafDidDismiss()
-//                    self?.loaf.completionHandler?(.all)
-                }
-            })
         }
         
     }
