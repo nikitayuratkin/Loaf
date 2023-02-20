@@ -396,18 +396,18 @@ final class LoafViewController: UIViewController {
     }
     
     private func constrainWithIconAlignment(_ alignment: Loaf.Style.IconAlignment, showsIcon: Bool = true) {
-        view.addSubview(label)
         view.addSubview(cancelXButton)
-        
-        NSLayoutConstraint.activate([
-            cancelXButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: 4),
-            cancelXButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
-            cancelXButton.heightAnchor.constraint(equalToConstant: 40),
-            cancelXButton.widthAnchor.constraint(equalToConstant: 40),
-        ])
+        view.addSubview(label)
         
         if showsIcon {
             view.addSubview(imageView)
+            
+            NSLayoutConstraint.activate([
+                cancelXButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -4),
+                cancelXButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                cancelXButton.heightAnchor.constraint(equalToConstant: 40),
+                cancelXButton.widthAnchor.constraint(equalToConstant: 40),
+            ])
             
             switch alignment {
             case .left:
@@ -477,6 +477,14 @@ final class LoafViewController: UIViewController {
             if isCancelButtonNeeded {
                 cancelXButton.alpha = 1
                 cancelXButton.isUserInteractionEnabled = true
+                
+                NSLayoutConstraint.activate([
+                    cancelXButton.trailingAnchor.constraint(equalTo: view.trailingAnchor, constant: -4),
+                    cancelXButton.centerYAnchor.constraint(equalTo: view.centerYAnchor),
+                    cancelXButton.heightAnchor.constraint(equalToConstant: 40),
+                    cancelXButton.widthAnchor.constraint(equalToConstant: 40),
+                ])
+                
                 NSLayoutConstraint.activate([
                     label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
                     label.trailingAnchor.constraint(equalTo: cancelXButton.trailingAnchor, constant: -4),
