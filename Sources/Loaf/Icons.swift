@@ -86,7 +86,7 @@ class Icons: NSObject {
         context.restoreGState()
     }
     
-    class func drawClose(frame targetFrame: CGRect = CGRect(x: 0, y: 0, width: 100, height: 100), resizing: ResizingBehavior = .aspectFit, color: UIColor = UIColor(red: 0.000, green: 0.000, blue: 0.000, alpha: 1.000)) {
+    class func drawClose(frame targetFrame: CGRect = CGRect(x: 0, y: 0, width: 300, height: 300), resizing: ResizingBehavior = .aspectFit, color: UIColor = UIColor(red: 0.000, green: 0.000, blue: 0.000, alpha: 1.000)) {
 
         let context = UIGraphicsGetCurrentContext()!
 
@@ -116,7 +116,7 @@ class Icons: NSObject {
         bezierPath.addCurve(to: CGPoint(x: 92.02, y: 8.04), controlPoint1: CGPoint(x: 81.26, y: 3.94), controlPoint2: CGPoint(x: 87.92, y: 3.94))
         bezierPath.addCurve(to: CGPoint(x: 92.02, y: 22.92), controlPoint1: CGPoint(x: 96.13, y: 12.15), controlPoint2: CGPoint(x: 96.13, y: 18.8))
         bezierPath.close()
-        color.setFill()
+        UIColor.white.setFill()
         bezierPath.fill()
 
         context.restoreGState()

@@ -1,0 +1,14 @@
+{
+  "pins" : [
+    {
+      "identity" : "loaf",
+      "kind" : "remoteSourceControl",
+      "location" : "https://github.com/nikitayuratkin/Loaf",
+      "state" : {
+        "branch" : "master",
+        "revision" : "c6abdff6f80f059d936a6b830f4297edf7e4b35e"
+      }
+    }
+  ],
+  "version" : 2
+}
