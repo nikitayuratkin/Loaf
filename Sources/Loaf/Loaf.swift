@@ -235,8 +235,8 @@ final class LoafViewController: UIViewController {
     var loaf: Loaf
     var isCancelButtonNeeded: Bool = false
     
-    let label = UILabel()
     let cancelXButton = UIButton()
+    let label = UILabel()
     let imageView = UIImageView(image: nil)
     var font = UIFont.systemFont(ofSize: 14, weight: .medium)
     var textAlignment: NSTextAlignment = .left
@@ -273,7 +273,23 @@ final class LoafViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        label.text = loaf.message
+        cancelXButton.setImage(Loaf.Icon.closeIcon, for: .normal)
+        cancelXButton.alpha = 0
+        cancelXButton.isUserInteractionEnabled = false
+        cancelXButton.contentVerticalAlignment = .fill
+        cancelXButton.contentHorizontalAlignment = .fill
+        cancelXButton.translatesAutoresizingMaskIntoConstraints = false
+        
+        if loaf.dismissalReason == .interactive {
+            let string = loaf.message
+            let range               = (string as NSString).range(of: "«Настройки»")
+            let attributedString    = NSMutableAttributedString(string: string)
+
+            attributedString.addAttribute(NSAttributedString.Key.underlineStyle, value: NSNumber(value: 1), range: range)
+            label.attributedText = attributedString
+        } else {
+            label.text = loaf.message
+        }
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
         label.textColor = .white
@@ -281,13 +297,6 @@ final class LoafViewController: UIViewController {
         label.textAlignment = textAlignment
         label.setContentCompressionResistancePriority(.required, for: .vertical)
         label.translatesAutoresizingMaskIntoConstraints = false
-        
-        cancelXButton.setImage(Loaf.Icon.closeIcon, for: .normal)
-        cancelXButton.alpha = 0
-        cancelXButton.isUserInteractionEnabled = false
-        cancelXButton.contentVerticalAlignment = .fill
-        cancelXButton.contentHorizontalAlignment = .fill
-        cancelXButton.translatesAutoresizingMaskIntoConstraints = false
         
         imageView.tintColor = .white
         imageView.contentMode = .scaleAspectFit
@@ -487,7 +496,7 @@ final class LoafViewController: UIViewController {
                 
                 NSLayoutConstraint.activate([
                     label.leadingAnchor.constraint(equalTo: view.leadingAnchor, constant: 16),
-                    label.trailingAnchor.constraint(equalTo: cancelXButton.trailingAnchor, constant: -4),
+                    label.trailingAnchor.constraint(equalTo: cancelXButton.leadingAnchor, constant: -4),
                     label.topAnchor.constraint(equalTo: view.topAnchor),
                     label.bottomAnchor.constraint(equalTo: view.bottomAnchor)
                 ])
