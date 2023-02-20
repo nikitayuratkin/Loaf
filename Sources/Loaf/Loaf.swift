@@ -273,7 +273,7 @@ final class LoafViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        cancelXButton.setImage(Loaf.Icon.closeIcon, for: .normal)
+        cancelXButton.setImage(Images.cancelIcon, for: .normal)
         cancelXButton.alpha = 0
         cancelXButton.isUserInteractionEnabled = false
         cancelXButton.contentVerticalAlignment = .fill

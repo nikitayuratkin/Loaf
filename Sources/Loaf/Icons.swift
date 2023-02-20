@@ -93,7 +93,7 @@ class Icons: NSObject {
         context.saveGState()
         let resizedFrame: CGRect = resizing.apply(rect: CGRect(x: 0, y: 0, width: 200, height: 200), target: targetFrame)
         context.translateBy(x: resizedFrame.minX, y: resizedFrame.minY)
-        context.scaleBy(x: resizedFrame.width / 200, y: resizedFrame.height / 200)
+        context.scaleBy(x: resizedFrame.width / 100, y: resizedFrame.height / 100)
         UIColor.white.setFill()
 
         let bezierPath = UIBezierPath()
@@ -117,7 +117,7 @@ class Icons: NSObject {
         bezierPath.addCurve(to: CGPoint(x: 92.02, y: 8.04), controlPoint1: CGPoint(x: 81.26, y: 3.94), controlPoint2: CGPoint(x: 87.92, y: 3.94))
         bezierPath.addCurve(to: CGPoint(x: 92.02, y: 22.92), controlPoint1: CGPoint(x: 96.13, y: 12.15), controlPoint2: CGPoint(x: 96.13, y: 18.8))
         bezierPath.close()
-        UIColor.white.setFill()
+        color.setFill()
         bezierPath.fill()
 
         context.restoreGState()
