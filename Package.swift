@@ -1,4 +1,4 @@
-// swift-tools-version:5.1
+// swift-tools-version:5.3
 
 import PackageDescription
 
@@ -17,7 +17,11 @@ let package = Package(
     targets: [
         .target(
             name: "Loaf",
-            dependencies: []),
+            dependencies: [],
+            resources: [
+                .process("Resources/Media.xcassets")
+            ]
+        ),
         .testTarget(
             name: "LoafTests",
             dependencies: ["Loaf"]),
