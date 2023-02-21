@@ -50,7 +50,7 @@ final class LoafViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        cancelXButton.setImage(UIImage(named: "cancelIcon"), for: .normal)
+        cancelXButton.setImage(UIImage(named: "cancelIcon", in: .main, compatibleWith: nil), for: .normal)
         cancelXButton.alpha = 0
         cancelXButton.isUserInteractionEnabled = false
         cancelXButton.contentVerticalAlignment = .fill
