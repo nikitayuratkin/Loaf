@@ -9,18 +9,5 @@
 import UIKit
 
 enum Images {
-    case xIcon
-    case warningIcon
-    case successIcon
-
-    var image: UIImage {
-        switch self {
-        case.xIcon:
-            return UIImage(named: "cancelIcon.png")!
-        case .warningIcon:
-            return UIImage(named: "warningIcon.png")!
-        case .successIcon:
-            return UIImage(named: "successIcon.png")!
-        }
-    }
+    static let cancelIcon = UIImage(imageLiteralResourceName: "cancelIcon")
 }
