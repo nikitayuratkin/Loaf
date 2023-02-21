@@ -19,7 +19,7 @@ let package = Package(
             name: "Loaf",
             dependencies: [],
             resources: [
-                .process("Resources/Media.xcassets")
+                .copy("Resources")
             ]
         ),
         .testTarget(
