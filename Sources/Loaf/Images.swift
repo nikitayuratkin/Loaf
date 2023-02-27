@@ -9,5 +9,5 @@
 import UIKit
 
 enum Images {
-    static let cancelIcon = UIImage(imageLiteralResourceName: "cancelIcon")
+    static let cancelIcon = UIImage(named: "cancelIcon", in: .module, compatibleWith: nil)
 }

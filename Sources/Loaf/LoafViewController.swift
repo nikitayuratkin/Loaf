@@ -50,7 +50,7 @@ final class LoafViewController: UIViewController {
     override func viewDidLoad() {
         super.viewDidLoad()
         
-        cancelXButton.setImage(UIImage(named: "cancelIcon", in: .module, compatibleWith: nil), for: .normal)
+        cancelXButton.setImage(Loaf.Icon.closeIcon, for: .normal)
         cancelXButton.alpha = 0
         cancelXButton.isUserInteractionEnabled = false
         cancelXButton.translatesAutoresizingMaskIntoConstraints = false

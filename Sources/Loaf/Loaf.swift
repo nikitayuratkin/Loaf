@@ -154,7 +154,7 @@ final public class Loaf {
         public static let error = Icons.imageOfError().withRenderingMode(.alwaysTemplate)
         public static let warning = Icons.imageOfWarning().withRenderingMode(.alwaysTemplate)
         public static let info = Icons.imageOfInfo().withRenderingMode(.alwaysTemplate)
-        public static let closeIcon = Icons.imageOfClose().withRenderingMode(.alwaysTemplate)
+        public static let closeIcon = UIImage(named: "cancelIcon", in: .module, compatibleWith: nil)
     }
     
     // MARK: - Properties
