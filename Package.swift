@@ -19,7 +19,7 @@ let package = Package(
             name: "Loaf",
             dependencies: [],
             resources: [
-                .copy("Resources")
+                .process("Resources")
             ]
         ),
         .testTarget(
