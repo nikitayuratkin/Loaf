@@ -70,7 +70,7 @@ final class LoafViewController: UIViewController {
         
         if loaf.dismissalReason == .interactive {
             let string = loaf.message
-            let range               = (string as NSString).range(of: "Настройки")
+            let range               = NSMakeRange(string.count - 9, string.count - 1)
             let attributedString    = NSMutableAttributedString(string: string)
             
             attributedString.addAttribute(NSAttributedString.Key.underlineStyle, value: NSNumber(value: 1), range: range)
