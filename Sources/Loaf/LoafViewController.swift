@@ -53,9 +53,8 @@ final class LoafViewController: UIViewController {
         cancelXButton.setImage(UIImage(named: "cancelIcon", in: .module, compatibleWith: nil), for: .normal)
         cancelXButton.alpha = 0
         cancelXButton.isUserInteractionEnabled = false
-        cancelXButton.contentVerticalAlignment = .fill
-        cancelXButton.contentHorizontalAlignment = .fill
         cancelXButton.translatesAutoresizingMaskIntoConstraints = false
+        cancelXButton.imageView?.contentMode = .scaleToFill
         
         label.numberOfLines = 0
         label.lineBreakMode = .byWordWrapping
