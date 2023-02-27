@@ -150,9 +150,9 @@ final public class Loaf {
     
     /// Icons used in basic states
     public enum Icon {
-        public static let success = Icons.imageOfSuccess().withRenderingMode(.alwaysTemplate)
+        public static let success = UIImage(named: "successIcon", in: .module, compatibleWith: nil)
         public static let error = Icons.imageOfError().withRenderingMode(.alwaysTemplate)
-        public static let warning = Icons.imageOfWarning().withRenderingMode(.alwaysTemplate)
+        public static let warning = UIImage(named: "warningIcon", in: .module, compatibleWith: nil)
         public static let info = Icons.imageOfInfo().withRenderingMode(.alwaysTemplate)
         public static let closeIcon = UIImage(named: "cancelIcon", in: .module, compatibleWith: nil)
     }
